@@ -1,0 +1,23 @@
+name: Sync from Gitee
+
+# GitHub 只读镜像：每天从 Gitee 拉取，不由三台机器直推 GitHub
+on:
+  schedule:
+    - cron: "0 16 * * *" # UTC 16:00 ≈ 北京时间次日 00:00
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mirror Gitee → GitHub
+        env:
+          GITEE_REPO: https://gitee.com/gsg733jwb/cursor-dotfiles.git
+          GITHUB_REPO: https://github.com/gsg733jwb-oss/cursor-dotfiles.git
+        run: |
+          git clone --bare "${GITEE_REPO}" repo.git
+          cd repo.git
+          git push --mirror "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/gsg733jwb-oss/cursor-dotfiles.git"

@@ -1,10 +1,12 @@
 #!/usr/bin/env bash
-# cursor-dotfiles sync — macOS / Linux（三机对等，Git 为「云端」）
+# cursor-dotfiles sync — macOS / Linux
+# 三台机器只与 Gitee 同步；GitHub 由 Gitee/定时任务镜像，本机不 push GitHub
 set -euo pipefail
 
 DOTFILES="$(cd "$(dirname "$0")" && pwd)"
 CURSOR_HOME="${HOME}/.cursor"
 EDITOR_USER="${HOME}/Library/Application Support/Cursor/User"
+GIT_REMOTE="${GIT_REMOTE:-gitee}"
 
 die() { echo "error: $*" >&2; exit 1; }
 
@@ -80,17 +82,19 @@ git_pull() {
   if ! git rev-parse --git-dir >/dev/null 2>&1; then
     die "not a git repo"
   fi
-  git pull --rebase origin main 2>/dev/null \
-    || git pull --rebase origin master 2>/dev/null \
-    || git pull --rebase
+  if ! git remote get-url "${GIT_REMOTE}" >/dev/null 2>&1; then
+    die "remote '${GIT_REMOTE}' not found — add: git remote add gitee https://gitee.com/gsg733jwb/cursor-dotfiles.git"
+  fi
+  git pull --rebase "${GIT_REMOTE}" main 2>/dev/null \
+    || git pull --rebase "${GIT_REMOTE}" master 2>/dev/null \
+    || git pull --rebase "${GIT_REMOTE}"
 }
 
-git_push_all() {
+git_push() {
   cd "${DOTFILES}"
-  git push origin main 2>/dev/null || git push origin master 2>/dev/null || git push origin HEAD
-  if git remote get-url gitee >/dev/null 2>&1; then
-    git push gitee main 2>/dev/null || git push gitee master 2>/dev/null || git push gitee HEAD
-  fi
+  git push "${GIT_REMOTE}" main 2>/dev/null \
+    || git push "${GIT_REMOTE}" master 2>/dev/null \
+    || git push "${GIT_REMOTE}" HEAD
 }
 
 pull_remote() {
@@ -105,11 +109,11 @@ push_remote() {
   if git diff --staged --quiet; then
     echo "nothing to commit"
   else
-    git commit -m "sync: $(date +%Y-%m-%d\ %H:%M) ($(hostname -s 2>/dev/null || echo mac))"
+    git commit -m "sync: $(date +%Y-%m-%d\ %H:%M) ($(hostname -s 2>/dev/null || echo host))"
   fi
   git_pull
-  git_push_all
-  echo "pushed to remote (GitHub + Gitee)"
+  git_push
+  echo "pushed to Gitee (${GIT_REMOTE}) — GitHub 由定时镜像更新，本机不直推"
 }
 
 sync_both() {
@@ -121,11 +125,11 @@ usage() {
   cat <<'EOF'
 Usage: ./sync.sh [pull|push|sync]
 
-  pull  从云端拉取 → 应用到本机（开工时用）
-  push  收集本机配置 → commit → 拉取合并 → 推云端（改完配置后用）
-  sync  pull + push（开完工一条龙）
+  pull  从 Gitee 拉取 → 应用到本机
+  push  收集本机 → commit → 拉取合并 → 仅推 Gitee
+  sync  pull + push
 
-三台机器权限相同，任意一台都可 pull / push。
+三台机器只 push Gitee；GitHub 每日由仓库镜像 / GitHub Actions 同步。
 EOF
 }
 
