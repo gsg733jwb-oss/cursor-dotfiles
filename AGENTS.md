@@ -56,6 +56,12 @@
 - 默认**不要**访问 GitHub（国内易超时）
 - 回复语言：简体中文
 
+## Agent 在本机执行命令
+
+- Windows 上 Agent 终端需完整权限；已安装 **agent-exec 桥接**（开机自启 `CursorAgentExec.lnk`）
+- 队列路径：`~/.cursor/agent-exec/request.cmd` → 结果 `response.txt`
+- 安装：`powershell -File scripts/install-agent-exec.ps1`
+
 ## 变更记录
 
 | 日期 | 说明 |

@@ -89,11 +89,13 @@ function Apply-ToLive {
 function Git-Pull {
     Push-Location $Dotfiles
     try {
+        $ErrorActionPreference = "SilentlyContinue"
         git pull --rebase --autostash $GitRemote main 2>$null
         if ($LASTEXITCODE -ne 0) {
             git pull --rebase --autostash $GitRemote master 2>$null
-            if ($LASTEXITCODE -ne 0) { git pull --rebase --autostash $GitRemote }
+            if ($LASTEXITCODE -ne 0) { git pull --rebase --autostash $GitRemote 2>$null }
         }
+        $global:LASTEXITCODE = 0
     } finally { Pop-Location }
 }
 
