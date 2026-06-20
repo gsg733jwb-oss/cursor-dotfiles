@@ -1,7 +1,7 @@
-# cursor-dotfiles sync — Windows（从机器，只 pull）
+# cursor-dotfiles sync — Windows（三机对等，Git 为「云端」）
 param(
     [Parameter(Position = 0)]
-    [ValidateSet("pull")]
+    [ValidateSet("pull", "push", "sync")]
     [string]$Command = "pull"
 )
 
@@ -29,6 +29,36 @@ function Sync-Dir($From, $To) {
     robocopy $From $To /MIR /NFL /NDL /NJH /NJS /nc /ns /np | Out-Null
     if ($LASTEXITCODE -ge 8) { throw "robocopy failed: $From -> $To (exit $LASTEXITCODE)" }
     $global:LASTEXITCODE = 0
+}
+
+function Collect-FromLive {
+    Ensure-Dirs
+
+    Sync-Dir (Join-Path $CursorHome "rules") (Join-Path $Dotfiles "cursor\rules")
+
+    if (Test-Path (Join-Path $CursorHome "skills")) {
+        Sync-Dir (Join-Path $CursorHome "skills") (Join-Path $Dotfiles "cursor\skills")
+    }
+
+    $mcpLive = Join-Path $CursorHome "mcp.json"
+    if (Test-Path $mcpLive) {
+        Copy-Item $mcpLive (Join-Path $Dotfiles "cursor\mcp.json") -Force
+    }
+
+    if (Test-Path (Join-Path $CursorHome "hooks")) {
+        $hooksDst = Join-Path $Dotfiles "cursor\hooks"
+        if (-not (Test-Path $hooksDst)) { New-Item -ItemType Directory -Path $hooksDst -Force | Out-Null }
+        Sync-Dir (Join-Path $CursorHome "hooks") $hooksDst
+    }
+
+    foreach ($f in @("settings.json", "keybindings.json")) {
+        $src = Join-Path $EditorUser $f
+        if (Test-Path $src) {
+            Copy-Item $src (Join-Path $Dotfiles "editor\$f") -Force
+        }
+    }
+
+    Write-Host "collected live config -> $Dotfiles"
 }
 
 function Apply-ToLive {
@@ -64,6 +94,67 @@ function Apply-ToLive {
     Write-Host "applied $Dotfiles -> live (~\.cursor + editor)"
 }
 
+function Git-Pull {
+    Push-Location $Dotfiles
+    try {
+        git pull --rebase origin main 2>$null
+        if ($LASTEXITCODE -ne 0) {
+            git pull --rebase origin master 2>$null
+            if ($LASTEXITCODE -ne 0) { git pull --rebase }
+        }
+    } finally {
+        Pop-Location
+    }
+}
+
+function Git-PushAll {
+    Push-Location $Dotfiles
+    try {
+        git push origin main 2>$null
+        if ($LASTEXITCODE -ne 0) {
+            git push origin master 2>$null
+            if ($LASTEXITCODE -ne 0) { git push origin HEAD }
+        }
+        $gitee = git remote get-url gitee 2>$null
+        if ($gitee) {
+            git push gitee main 2>$null
+            if ($LASTEXITCODE -ne 0) {
+                git push gitee master 2>$null
+                if ($LASTEXITCODE -ne 0) { git push gitee HEAD }
+            }
+        }
+    } finally {
+        Pop-Location
+    }
+}
+
+function Pull-Remote {
+    Git-Pull
+    Apply-ToLive
+}
+
+function Push-Remote {
+    Collect-FromLive
+    Push-Location $Dotfiles
+    try {
+        git add -A
+        git diff --staged --quiet
+        if ($LASTEXITCODE -ne 0) {
+            $hostName = $env:COMPUTERNAME
+            git commit -m "sync: $(Get-Date -Format 'yyyy-MM-dd HH:mm') ($hostName)"
+        } else {
+            Write-Host "nothing to commit"
+        }
+    } finally {
+        Pop-Location
+    }
+    Git-Pull
+    Git-PushAll
+    Write-Host "pushed to remote (GitHub + Gitee)"
+}
+
 switch ($Command) {
-    "pull" { Apply-ToLive }
+    "pull" { Pull-Remote }
+    "push" { Push-Remote }
+    "sync" { Pull-Remote; Push-Remote }
 }
