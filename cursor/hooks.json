@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "hooks": {
+    "afterFileEdit": [
+      {
+        "command": "powershell.exe -ExecutionPolicy Bypass -NoProfile -File ./hooks/auto-sync-gitee.ps1",
+        "timeout": 15
+      }
+    ],
+    "stop": [
+      {
+        "command": "powershell.exe -ExecutionPolicy Bypass -NoProfile -File ./hooks/session-end-sync.ps1",
+        "timeout": 30
+      }
+    ]
+  }
+}
