@@ -3,21 +3,13 @@
   "hooks": {
     "afterFileEdit": [
       {
-        "command": "./hooks/auto-sync-gitee.sh",
-        "timeout": 15
-      },
-      {
-        "command": "powershell.exe -ExecutionPolicy Bypass -NoProfile -File ./hooks/auto-sync-gitee.ps1",
+        "command": "powershell.exe -ExecutionPolicy Bypass -NoProfile -WindowStyle Hidden -File ./hooks/auto-sync-gitee.ps1",
         "timeout": 15
       }
     ],
     "stop": [
       {
-        "command": "./hooks/session-end-sync.sh",
-        "timeout": 30
-      },
-      {
-        "command": "powershell.exe -ExecutionPolicy Bypass -NoProfile -File ./hooks/session-end-sync.ps1",
+        "command": "powershell.exe -ExecutionPolicy Bypass -NoProfile -WindowStyle Hidden -File ./hooks/session-end-sync.ps1",
         "timeout": 30
       }
     ]

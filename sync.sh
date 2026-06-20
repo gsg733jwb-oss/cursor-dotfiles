@@ -39,7 +39,7 @@ collect_from_live() {
   fi
 
   if [[ -f "${CURSOR_HOME}/hooks.json" ]]; then
-    cp "${CURSOR_HOME}/hooks.json" "${DOTFILES}/cursor/hooks.json"
+    cp "${CURSOR_HOME}/hooks.json" "${DOTFILES}/cursor/hooks.macos.json"
   fi
 
   for f in settings.json keybindings.json; do
@@ -71,7 +71,9 @@ apply_to_live() {
     rsync -a "${DOTFILES}/cursor/hooks/" "${CURSOR_HOME}/hooks/"
   fi
 
-  if [[ -f "${DOTFILES}/cursor/hooks.json" ]]; then
+  if [[ -f "${DOTFILES}/cursor/hooks.macos.json" ]]; then
+    cp "${DOTFILES}/cursor/hooks.macos.json" "${CURSOR_HOME}/hooks.json"
+  elif [[ -f "${DOTFILES}/cursor/hooks.json" ]]; then
     cp "${DOTFILES}/cursor/hooks.json" "${CURSOR_HOME}/hooks.json"
   fi
 

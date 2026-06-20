@@ -1,4 +1,4 @@
-﻿# Cursor hook: trigger debounced auto-push after config file edits
+﻿# Cursor hook: trigger debounced auto-push (Windows peer)
 $ErrorActionPreference = "SilentlyContinue"
 $raw = [Console]::In.ReadToEnd()
 if (-not $raw) { exit 0 }
@@ -24,11 +24,11 @@ foreach ($p in $paths) {
 }
 if (-not $matched) { exit 0 }
 
-Start-Process -FilePath "powershell.exe" -ArgumentList @(
-    "-ExecutionPolicy", "Bypass",
-    "-NoProfile",
-    "-WindowStyle", "Hidden",
-    "-File", (Join-Path $env:USERPROFILE "cursor-sync-auto.ps1")
-) -WindowStyle Hidden
+$auto = Join-Path $env:USERPROFILE "cursor-dotfiles\scripts\cursor-sync-auto.ps1"
+if (-not (Test-Path $auto)) { exit 0 }
+
+Start-Process -FilePath "powershell.exe" -WindowStyle Hidden -ArgumentList @(
+    "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", $auto
+) | Out-Null
 
 exit 0

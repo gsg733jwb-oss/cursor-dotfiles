@@ -89,10 +89,10 @@ function Apply-ToLive {
 function Git-Pull {
     Push-Location $Dotfiles
     try {
-        git pull --rebase $GitRemote main 2>$null
+        git pull --rebase --autostash $GitRemote main 2>$null
         if ($LASTEXITCODE -ne 0) {
-            git pull --rebase $GitRemote master 2>$null
-            if ($LASTEXITCODE -ne 0) { git pull --rebase $GitRemote }
+            git pull --rebase --autostash $GitRemote master 2>$null
+            if ($LASTEXITCODE -ne 0) { git pull --rebase --autostash $GitRemote }
         }
     } finally { Pop-Location }
 }
@@ -122,7 +122,7 @@ function Push-Remote {
     } finally { Pop-Location }
     Git-Pull
     Git-Push
-    Write-Host "pushed to Gitee ($GitRemote) — GitHub 由定时镜像更新"
+    Write-Host "pushed to Gitee ($GitRemote)."
 }
 
 switch ($Command) {

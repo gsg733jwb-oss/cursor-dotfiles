@@ -1,92 +1,63 @@
-# 我的 Cursor 多机环境
+# 我的 Cursor 多机环境 — 三台机器当作「一台 Cursor」
 
-> 给 Agent 读的环境说明。聊天历史不能跨机同步；以本文件 + `cursor/rules/multi-machine.mdc` 为准。
+> 给 Agent 读。聊天历史不能跨机；**约定、规则、配置**通过 Gitee 实时对齐。
 
-## 机器角色（对等）
+## 核心理念
 
-| 机器 | 权限 |
-|------|------|
-| **macOS × 1** | 仅对 **Gitee** pull / push |
-| **Windows × 2** | 仅对 **Gitee** pull / push |
+**macOS × 1 + Windows × 2 = 一台逻辑上的 Cursor**
 
-## 云端架构
+- 三台机器**对等**：均可 pull / push **Gitee**
+- 配置改动 → **防抖后自动上传**（约 45 秒）→ 其他机器「开工」pull 即对齐
+- Agent 跨机延续：读 `AGENTS.md`、`multi-machine.mdc`，用户可 `@AGENTS.md`
+
+## 云端（仅 Gitee 实时；GitHub 只读镜像）
 
 ```
-三台机器  ──push/pull──►  Gitee（主云端，实时）
-                            │
-                  每天定时   │  GitHub Actions / Gitee 镜像
-                            ▼
-                         GitHub（只读备份）
+三台机器  ←──pull/push──→  Gitee（主）
+                              │
+                    每日镜像   ▼
+                           GitHub（备份，机器不默认访问）
 ```
 
-- **Gitee（主）**：`https://gitee.com/gsg733jwb/cursor-dotfiles`
-- **GitHub（镜像）**：`https://github.com/gsg733jwb-oss/cursor-dotfiles` — 三台机器**不直推**
-- **项目仓库**（非 dotfiles）：`https://gitee.com/gsg733jwb/jiangwb.git`
-
-镜像配置见 [docs/gitee-github-mirror.md](./docs/gitee-github-mirror.md)。
-
-## 项目仓库（三机统一）
-
-| Remote | 用途 | 示例 URL |
-|--------|------|----------|
-| `origin` | 默认 pull/push | `https://gitee.com/gsg733jwb/jiangwb.git` |
-| `github` | 仅用户明确要求时 | `https://github.com/gsg733jwb-oss/jiangwb.git` |
-
-各项目可在 `.cursor/rules/git-remotes.mdc` 写明 Agent 行为。
-
-**任意机器开工（项目 + 配置）：**
-
-```bash
-git pull                                    # 项目代码（Gitee）
-cd ~/cursor-dotfiles && ./sync.sh pull      # macOS 配置
-# Windows: cd %USERPROFILE%\cursor-dotfiles && .\sync.ps1 pull
-```
+- dotfiles：`https://gitee.com/gsg733jwb/cursor-dotfiles`
+- 项目代码：`https://gitee.com/gsg733jwb/jiangwb.git`（各项目独立）
 
 ## 同步命令
 
-| 时机 | macOS | Windows |
-|------|-------|---------|
-| 开工 | `cd ~/cursor-dotfiles && ./sync.sh pull` | `.\sync.ps1 pull` |
-| 改完配置 | `./sync.sh push` | `.\sync.ps1 push` |
+| 用户说 / 时机 | macOS | Windows |
+|---------------|-------|---------|
+| **开工** | `cd ~/cursor-dotfiles && ./scripts/cursor-sync.sh pull` | `powershell -File "$env:USERPROFILE\cursor-dotfiles\scripts\cursor-sync.ps1" pull` |
+| **收工** / 立即上传 | `./scripts/cursor-sync.sh push` | 同上 `push` |
+| 自动上传 | Hook + `cursor-sync-watch`（可选） | Hook + `install-windows-sync.ps1`（可选） |
 
-`push` = 收集本机 → commit → `git pull --rebase gitee` → **只推 Gitee**。
+`push` = 收集本机 → commit → `git pull --rebase gitee` → **只推 Gitee**
 
-## 远程配置（clone / 已有仓库）
-
-```bash
-git remote add gitee https://gitee.com/gsg733jwb/cursor-dotfiles.git
-git branch -u gitee/main main
-# 勿将 origin 用于日常 push；若 origin 指向 GitHub 可保留只读或删除
-```
-
-新机器 clone：
-
-```bash
-git clone https://gitee.com/gsg733jwb/cursor-dotfiles.git ~/cursor-dotfiles
-```
-
-## 路径映射
+## 路径
 
 | dotfiles | macOS | Windows |
 |----------|-------|---------|
 | `cursor/` | `~/.cursor/` | `%USERPROFILE%\.cursor\` |
 | `editor/` | `~/Library/Application Support/Cursor/User/` | `%APPDATA%\Cursor\User\` |
 
-## 同步内容
+## 平台差异（重要）
 
-**进 Gitee：** rules、skills、mcp.json、hooks、editor 设置
+| 文件 | macOS | Windows |
+|------|-------|---------|
+| Hooks 配置 | `cursor/hooks.macos.json` → 本机 `hooks.json` | `cursor/hooks.json`（仅 PowerShell） |
+| 自动同步脚本 | `scripts/*.sh` | `scripts/*.ps1` |
 
-**不进 Git：** skills-cursor、projects、聊天历史、密钥
+**Windows 禁止在 hooks.json 里注册 `.sh`**（会启动 Git Bash 卡住）。
 
-## 编码习惯
+## Agent 行为
 
+- 用户说「开工」→ **直接执行 pull**，不要只告诉用户怎么做
+- 用户说「收工」→ **直接执行 push**
+- 改了 dotfiles 内规则/脚本 → 提醒可 push，或依赖自动上传
+- 默认**不要**访问 GitHub（国内易超时）
 - 回复语言：简体中文
-- MCP 密钥用环境变量
-- 项目代码独立仓库，与 dotfiles 分开
 
 ## 变更记录
 
 | 日期 | 说明 |
 |------|------|
-| 2026-06-20 | 对等模式：三机均可 push |
-| 2026-06-20 | Gitee 主云端；GitHub 每日镜像，机器不直推 GitHub |
+| 2026-06-20 | 三机对等；Gitee 实时；AGENTS.md 为跨机共识 |

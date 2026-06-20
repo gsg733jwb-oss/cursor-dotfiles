@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "hooks": {
+    "afterFileEdit": [
+      {
+        "command": "./hooks/auto-sync-gitee.sh",
+        "timeout": 15
+      }
+    ],
+    "stop": [
+      {
+        "command": "./hooks/session-end-sync.sh",
+        "timeout": 30
+      }
+    ]
+  }
+}
