@@ -1,0 +1,32 @@
+---
+description: 三台机器 Cursor 统一配置约定（macOS 主机器）
+alwaysApply: true
+---
+
+# 多机 Cursor 约定
+
+## 机器与仓库
+
+- 当前环境以 **macOS 为主机器**；个人配置源仓库为 `~/cursor-dotfiles`
+- **Windows × 2** 为从机器：只 `pull`，不 `push`
+- 完整环境说明见 `~/cursor-dotfiles/AGENTS.md`（可用 `@AGENTS.md` 引用）
+
+## 修改配置后
+
+- 改了 `~/.cursor/skills`、`rules`、`mcp.json`、`hooks` 或编辑器 User 设置后，**提醒用户**在 Mac 上执行：
+  ```bash
+  cd ~/cursor-dotfiles && ./sync.sh push
+  ```
+- Windows 用户开工前执行：`git pull` + `.\sync.ps1 pull`
+
+## 禁止事项
+
+- **不要**修改 `~/.cursor/skills-cursor/`（Cursor 内置，各机自动同步）
+- **不要**把项目规范写入 dotfiles；项目规则放各仓库 `.cursor/rules/`
+- **不要**在 Git 中提交明文 API Key、token、`.env`；MCP 密钥用环境变量
+- **不要**在 Windows 上 `git push` 或 `./sync.sh push`
+
+## Agent 上下文
+
+- 聊天历史**不能**跨机；跨机延续任务靠 `AGENTS.md`、Rules、`@` 引用文件
+- 用户说「按多机约定继续」时，先读 `AGENTS.md` 再行动
