@@ -48,6 +48,10 @@ function Collect-FromLive {
         if (-not (Test-Path $hooksDst)) { New-Item -ItemType Directory -Path $hooksDst -Force | Out-Null }
         Sync-Dir (Join-Path $CursorHome "hooks") $hooksDst
     }
+    $hooksJson = Join-Path $CursorHome "hooks.json"
+    if (Test-Path $hooksJson) {
+        Copy-Item $hooksJson (Join-Path $Dotfiles "cursor\hooks.json") -Force
+    }
     foreach ($f in @("settings.json", "keybindings.json")) {
         $src = Join-Path $EditorUser $f
         if (Test-Path $src) { Copy-Item $src (Join-Path $Dotfiles "editor\$f") -Force }
@@ -69,6 +73,10 @@ function Apply-ToLive {
         $hooksDst = Join-Path $CursorHome "hooks"
         if (-not (Test-Path $hooksDst)) { New-Item -ItemType Directory -Path $hooksDst -Force | Out-Null }
         Sync-Dir $hooksSrc $hooksDst
+    }
+    $hooksJsonSrc = Join-Path $Dotfiles "cursor\hooks.json"
+    if (Test-Path $hooksJsonSrc) {
+        Copy-Item $hooksJsonSrc (Join-Path $CursorHome "hooks.json") -Force
     }
     if (-not (Test-Path $EditorUser)) { New-Item -ItemType Directory -Path $EditorUser -Force | Out-Null }
     foreach ($f in @("settings.json", "keybindings.json")) {

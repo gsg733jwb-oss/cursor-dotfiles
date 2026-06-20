@@ -38,6 +38,10 @@ collect_from_live() {
     rsync -a "${CURSOR_HOME}/hooks/" "${DOTFILES}/cursor/hooks/"
   fi
 
+  if [[ -f "${CURSOR_HOME}/hooks.json" ]]; then
+    cp "${CURSOR_HOME}/hooks.json" "${DOTFILES}/cursor/hooks.json"
+  fi
+
   for f in settings.json keybindings.json; do
     if [[ -f "${EDITOR_USER}/${f}" ]]; then
       cp "${EDITOR_USER}/${f}" "${DOTFILES}/editor/${f}"
@@ -65,6 +69,10 @@ apply_to_live() {
   if [[ -d "${DOTFILES}/cursor/hooks" ]] && [[ -n "$(ls -A "${DOTFILES}/cursor/hooks" 2>/dev/null || true)" ]]; then
     mkdir -p "${CURSOR_HOME}/hooks"
     rsync -a "${DOTFILES}/cursor/hooks/" "${CURSOR_HOME}/hooks/"
+  fi
+
+  if [[ -f "${DOTFILES}/cursor/hooks.json" ]]; then
+    cp "${DOTFILES}/cursor/hooks.json" "${CURSOR_HOME}/hooks.json"
   fi
 
   mkdir -p "${EDITOR_USER}"
