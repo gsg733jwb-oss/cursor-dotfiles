@@ -25,6 +25,23 @@
 
 镜像配置见 [docs/gitee-github-mirror.md](./docs/gitee-github-mirror.md)。
 
+## 项目仓库（三机统一）
+
+| Remote | 用途 | 示例 URL |
+|--------|------|----------|
+| `origin` | 默认 pull/push | `https://gitee.com/gsg733jwb/jiangwb.git` |
+| `github` | 仅用户明确要求时 | `https://github.com/gsg733jwb-oss/jiangwb.git` |
+
+各项目可在 `.cursor/rules/git-remotes.mdc` 写明 Agent 行为。
+
+**任意机器开工（项目 + 配置）：**
+
+```bash
+git pull                                    # 项目代码（Gitee）
+cd ~/cursor-dotfiles && ./sync.sh pull      # macOS 配置
+# Windows: cd %USERPROFILE%\cursor-dotfiles && .\sync.ps1 pull
+```
+
 ## 同步命令
 
 | 时机 | macOS | Windows |
