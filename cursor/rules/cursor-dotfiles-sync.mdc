@@ -14,16 +14,16 @@ alwaysApply: true
 | **开工**、**拉代码**、**同步配置** | `powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\cursor-sync.ps1" pull` |
 | **更新gitee**、**上传配置**、**收工** | `powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\cursor-sync.ps1" push` |
 
+## 自动上传（已启用）
+
+- 后台监听：`cursor-sync-watch.ps1`（开机自启），监听 `~\.cursor` 与 Cursor 设置变更，**45 秒防抖**后自动 push 到 Gitee。
+- Cursor Hook：`afterFileEdit` / `stop` 也会触发防抖上传。
+- 日志：`~\.cursor\sync-auto.log`
+- **开工 pull** 期间会短暂抑制自动上传，避免拉取后误 push。
+
 ## 规则
 
 - 收到上述口令后**直接运行命令**，不要只告诉用户怎么做。
 - pull：从 Gitee 拉取并应用到 `~\.cursor` 与 Cursor User 设置。
 - push：收集本机配置 → commit → pull --rebase → push 到 Gitee。
-- **不要**在每次普通对话结束时自动 push，除非用户明确要求自动上传。
-- push 前若有未提交变更才 commit；无变更则只 pull/push 或直接报告「无变更」。
-
-## 自动上传
-
-用户若问能否每次运行自动上传：说明不推荐每轮对话自动 push（易产生无意义提交、冲突、误传敏感信息）。可选方案：
-1. 手动说「更新gitee」或「收工」（推荐）
-2. 用 Cursor hook 在会话结束时 push（需用户确认后再配置）
+- 已启用自动上传；用户说「收工」仍可手动立即 push 一次。
