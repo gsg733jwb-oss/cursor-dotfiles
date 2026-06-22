@@ -12,6 +12,11 @@
   <true/>
   <key>KeepAlive</key>
   <true/>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/usr/local/bin:/usr/local/git/bin:/opt/homebrew/bin:/usr/bin:/bin</string>
+  </dict>
   <key>StandardOutPath</key>
   <string>__HOME__/.cursor/sync-watch.stdout.log</string>
   <key>StandardErrorPath</key>

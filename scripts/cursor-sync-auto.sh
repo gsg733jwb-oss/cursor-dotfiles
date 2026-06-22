@@ -2,6 +2,9 @@
 # 防抖后自动 push 到 Gitee（Mac / Linux）
 set -euo pipefail
 
+# LaunchAgent / Cursor Hook 环境 PATH 极简，需包含 git 与 credential helper
+export PATH="/usr/local/bin:/usr/local/git/bin:/opt/homebrew/bin:/usr/bin:/bin:${PATH:-}"
+
 DOTFILES="${HOME}/cursor-dotfiles"
 LOG="${HOME}/.cursor/sync-auto.log"
 TOKEN_FILE="${HOME}/.cursor/.sync-debounce.token"

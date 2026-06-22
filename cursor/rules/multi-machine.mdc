@@ -20,7 +20,19 @@ alwaysApply: true
 | **收工**、更新 Gitee、上传配置 | `./scripts/cursor-sync.sh push` | 同上 `push` |
 
 - 收到口令后 **直接执行**，不要只告诉用户怎么做
-- 配置改动也可由 Hook + 防抖自动上传（约 45 秒）
+
+## 自动上传（有变更即上传）
+
+三台机器均可启用；改 `rules` / `skills` / `mcp.json` / `hooks` / 编辑器设置后，**约 45 秒防抖**自动 push 到 Gitee。
+
+| 机制 | macOS | Windows |
+|------|-------|---------|
+| 后台轮询 | LaunchAgent `cursor-sync-watch`（开机自启，每 10s 检测） | `cursor-sync-watch.ps1`（开机自启） |
+| Cursor Hook | 编辑配置 / 对话结束 → 防抖上传 | 同上（PowerShell） |
+| 日志 | `~/.cursor/sync-auto.log` | `%USERPROFILE%\.cursor\sync-auto.log` |
+| 安装 | `scripts/install-mac-sync.sh` | `scripts/install-windows-sync.ps1` |
+
+**开工 pull** 期间会短暂抑制自动上传，避免拉取后误 push。
 
 ## 禁止事项
 

@@ -2,6 +2,8 @@
 # 轮询监听 Cursor 配置变更，触发防抖上传（无需 fswatch）
 set -euo pipefail
 
+export PATH="/usr/local/bin:/usr/local/git/bin:/opt/homebrew/bin:/usr/bin:/bin:${PATH:-}"
+
 DOTFILES="${HOME}/cursor-dotfiles"
 AUTO="${DOTFILES}/scripts/cursor-sync-auto.sh"
 LOG="${HOME}/.cursor/sync-auto.log"
