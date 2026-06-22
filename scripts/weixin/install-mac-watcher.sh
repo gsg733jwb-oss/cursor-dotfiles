@@ -13,6 +13,18 @@ if [[ ! -f "$DEST/watcher.config.json" ]]; then
 fi
 chmod +x "$SRC/start-watcher.sh" "$SRC/stop-watcher.sh"
 
+# LaunchAgent：崩溃/重启后自动拉起监听器
+LABEL="com.gsg733jwb.weixin-watcher"
+PLIST_SRC="$(cd "$SRC/../.." && pwd)/launchd/com.gsg733jwb.weixin-watcher.plist.template"
+PLIST_DST="$HOME/Library/LaunchAgents/${LABEL}.plist"
+if [[ -f "$PLIST_SRC" ]]; then
+  sed "s|__HOME__|${HOME}|g; s|__NODE__|$(command -v node)|g" "$PLIST_SRC" > "$PLIST_DST"
+  launchctl bootout "gui/$(id -u)/${LABEL}" 2>/dev/null || true
+  launchctl bootstrap "gui/$(id -u)" "$PLIST_DST"
+  launchctl enable "gui/$(id -u)/${LABEL}" 2>/dev/null || true
+  echo "LaunchAgent: ${LABEL}（KeepAlive）"
+fi
+
 echo "已安装到 $DEST"
 echo ""
 echo "下一步："
