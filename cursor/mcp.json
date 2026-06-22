@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "weixin": {
+      "command": "npx",
+      "args": ["-y", "weixin-mcp"]
+    }
+  }
+}
