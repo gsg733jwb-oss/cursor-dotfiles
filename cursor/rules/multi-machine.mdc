@@ -1,24 +1,32 @@
 ---
-description: 三台机器当作一台 Cursor（Gitee 对等同步）
+description: 三台机器 Cursor 统一配置约定（macOS 主机器）
 alwaysApply: true
 ---
 
-# 一台 Cursor，三台机器
+# 多机 Cursor 约定
 
-- **对等**：macOS × 1、Windows × 2，均可对 Gitee pull/push
-- 配置仓库：`~/cursor-dotfiles` / `%USERPROFILE%\cursor-dotfiles`
-- 跨机共识：读 `AGENTS.md`（`@AGENTS.md`）；聊天历史不跨机
-- 配置变更约 **45 秒防抖后自动 push Gitee**；其他机器「开工」pull 即可对齐
+## 机器与仓库
 
-## 口令（直接执行，勿只口述）
+- 当前环境以 **macOS 为主机器**；个人配置源仓库为 `~/cursor-dotfiles`
+- **Windows × 2** 为从机器：只 `pull`，不 `push`
+- 完整环境说明见 `~/cursor-dotfiles/AGENTS.md`（可用 `@AGENTS.md` 引用）
 
-| 用户说 | Windows |
-|--------|---------|
-| **开工**、拉代码、同步配置 | `powershell -NoProfile -ExecutionPolicy Bypass -File "$env:USERPROFILE\cursor-dotfiles\scripts\cursor-sync.ps1" pull` |
-| **收工**、更新gitee、上传配置 | 同上路径，`push` |
+## 修改配置后
 
-## 禁止
+- 改了 `~/.cursor/skills`、`rules`、`mcp.json`、`hooks` 或编辑器 User 设置后，**提醒用户**在 Mac 上执行：
+  ```bash
+  cd ~/cursor-dotfiles && ./sync.sh push
+  ```
+- Windows 用户开工前执行：`git pull` + `.\sync.ps1 pull`
 
-- 默认 **不要** `git fetch/pull origin`、不要访问 GitHub（除非用户明确要求）
-- 不要改 `skills-cursor/`；不要提交明文密钥
-- Windows hooks.json **不要**注册 `.sh` 脚本
+## 禁止事项
+
+- **不要**修改 `~/.cursor/skills-cursor/`（Cursor 内置，各机自动同步）
+- **不要**把项目规范写入 dotfiles；项目规则放各仓库 `.cursor/rules/`
+- **不要**在 Git 中提交明文 API Key、token、`.env`；MCP 密钥用环境变量
+- **不要**在 Windows 上 `git push` 或 `./sync.sh push`
+
+## Agent 上下文
+
+- 聊天历史**不能**跨机；跨机延续任务靠 `AGENTS.md`、Rules、`@` 引用文件
+- 用户说「按多机约定继续」时，先读 `AGENTS.md` 再行动

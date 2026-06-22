@@ -1,16 +1,29 @@
 ---
-description: 开工/收工口令与 Gitee 对等同步
+description: 用户说「开工」或「更新gitee」时自动同步 cursor-dotfiles
 alwaysApply: true
 ---
 
-# 同步口令（Windows）
+# Cursor 配置同步口令
 
-路径：`%USERPROFILE%\cursor-dotfiles`
+用户在本机 Windows 上使用 `C:\Users\Admin\cursor-dotfiles`（Gitee 为主远程）。
 
-| 用户说 | 执行 |
-|--------|------|
-| **开工** | `scripts\cursor-sync.ps1 pull` |
-| **收工** | `scripts\cursor-sync.ps1 push` |
+## 口令
 
-- 仅 Gitee；配置改动会自动防抖上传
-- 跨机理解：先读 `AGENTS.md`
+| 用户说 | 立即执行 |
+|--------|----------|
+| **开工**、**拉代码**、**同步配置** | `powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\cursor-sync.ps1" pull` |
+| **更新gitee**、**上传配置**、**收工** | `powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\cursor-sync.ps1" push` |
+
+## 自动上传（已启用）
+
+- 后台监听：`cursor-sync-watch.ps1`（开机自启），监听 `~\.cursor` 与 Cursor 设置变更，**45 秒防抖**后自动 push 到 Gitee。
+- Cursor Hook：`afterFileEdit` / `stop` 也会触发防抖上传。
+- 日志：`~\.cursor\sync-auto.log`
+- **开工 pull** 期间会短暂抑制自动上传，避免拉取后误 push。
+
+## 规则
+
+- 收到上述口令后**直接运行命令**，不要只告诉用户怎么做。
+- pull：从 Gitee 拉取并应用到 `~\.cursor` 与 Cursor User 设置。
+- push：收集本机配置 → commit → pull --rebase → push 到 Gitee。
+- 已启用自动上传；用户说「收工」仍可手动立即 push 一次。
