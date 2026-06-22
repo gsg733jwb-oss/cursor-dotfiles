@@ -9,6 +9,6 @@ alwaysApply: true
 
 1. **禁止**在终端输出 ASCII 二维码让用户扫描（终端有滚动条，体验差）。
 2. **必须**在浏览器中展示大尺寸二维码页面（一屏可见、可扫）。
-3. 优先使用 `C:\Users\Admin\.weixin-mcp\qr-login-server.mjs` 启动本地页面（默认 `http://localhost:8765`），并用浏览器打开。
+3. 优先使用 `~/.weixin-mcp/qr-login-server.mjs` 启动本地页面（默认 `http://localhost:8765`），并用浏览器打开。
 4. 若需 OpenClaw 登录，同样将二维码链接或图片渲染到浏览器页面，而非终端。
 5. 登录完成后告知用户可关闭页面；验证 `weixin-mcp status` 或等价状态命令。
